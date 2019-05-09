@@ -1,0 +1,16 @@
+# node.js application specific
+node_modules
+config/*.json
+
+# docker & environment
+.env
+deployment/deployment.sh
+
+# minifed js file
+public/assets/js/*.js
+
+# helper files
+/projekte
+
+# ide specific
+.vscode

@@ -1,0 +1,16 @@
+{
+    "port": 80,
+    "database": {
+        "host": "",
+        "port": 21345,
+        "user": "",
+        "password": "",
+        "database": ""
+    },
+    "mailserver": {
+        "host": "",
+        "user": "",
+        "password": ""
+    }
+    }
+}
