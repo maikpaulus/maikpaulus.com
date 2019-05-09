@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# enter your deployment code here
+# deploy with npm run start:deployment
+# enjoy!
