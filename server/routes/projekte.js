@@ -9,7 +9,7 @@ const A4 = {
 
 module.exports = exports = {
     async printAll(request, response) {
-        const language = request.params.language || 'de';
+        const language = request.params.language && 'en' === request.params.language ? request.params.language : 'de';
         projektRepository.findAll()
             .then(projects => {
                 response.set('Content-Type', 'application/pdf');
