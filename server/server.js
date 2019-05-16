@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 
-app.get('/dokumente/projekte', routes.projekte.printAll);
+app.get('/dokumente/:language?/projekte', routes.projekte.printAll);
 
 app.post('/kontakt', (req, res) => {
     let requestParams = req.body;

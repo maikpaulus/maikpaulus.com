@@ -13,7 +13,7 @@ class ProjektRepository {
         return new Promise((resolve, reject) => {
             MongoClient.connect(getDatabaseUrl(this.config), { useNewUrlParser: true }, (err, client) => {
                 if (err) {
-                    return reject(false);
+                    return reject(err);
                 }
 
                 return resolve(client);

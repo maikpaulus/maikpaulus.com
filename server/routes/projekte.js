@@ -9,6 +9,7 @@ const A4 = {
 
 module.exports = exports = {
     async printAll(request, response) {
+        const language = request.params.language || 'de';
         projektRepository.findAll()
             .then(projects => {
                 response.set('Content-Type', 'application/pdf');
@@ -25,9 +26,10 @@ module.exports = exports = {
 
                 const dokument = new PDFDokument({
                     info: {
-                        Title: 'Projekte | Maik Paulus',
+                        Title: `${getMetaDataByLanguage('projekte', language)} | Maik Paulus`,
                         Author: 'Maik Paulus'
-                    }
+                    }, 
+                    language
                 });
                 
                 pagesToCreate.forEach(projectsForPage => {
@@ -36,12 +38,93 @@ module.exports = exports = {
                 dokument.addPageNumbers();
                 dokument.pipe(response);
                 dokument.close();
+            })
+            .catch(err => {
+                //console.log(err);
+                return response.status(500).json({
+                    success: false,
+                    message: "Die Anfrage konnte nicht verarbeitet werden."
+                })
             });
     }
 }
 
 function mm(mm) {
     return mm * 2.83465;
+}
+
+/* quick helper function to provide translations */
+function getMetaDataByLanguage(keyword, language) {
+    const metaData = {
+        de: {
+            projekte: 'Projekte',
+            meineprojekte: 'Meine Projekte',
+            seite: 'Seite',
+            von: 'von',
+            auftraggeber: 'Auftraggeber',
+            ort: 'Ort',
+            team: 'Agiles Team',
+            art: 'Art',
+            anforderungen: 'Anforderungen',
+            aufgaben: 'Aufgaben',
+            monat: 'Monat',
+            monatsuffix: 'e',
+            
+            privat: 'Privat',
+            festanstellung: 'Festanstellung',
+            freiberuflich: 'Freiberuflich',
+
+            j: 'Ja',
+            n: 'Nein'
+        },
+        en: {
+            projekte: 'Projects',
+            meineprojekte: 'My projects',
+            seite: 'Page',
+            von: 'of',
+            auftraggeber: 'Customer',
+            ort: 'Location',
+            team: 'Agile & Team',
+            art: 'Type',
+            anforderungen: 'Requirements',
+            aufgaben: 'Tasks',
+            monat: 'month',
+            monatsuffix: 's',
+
+            privat: 'Private',
+            festanstellung: 'Permant',
+            freiberuflich: 'Freelance',
+
+            j: 'yes',
+            n: 'no'
+        }
+    }
+
+    let lang = language || 'de';
+
+    return metaData[lang][keyword] || undefined;
+}
+
+/* helper function to get the right label for months */
+function getMonthLabel(months, language) {
+    let label = getMetaDataByLanguage('monat', language);
+
+    if (1 < months) {
+        label += getMetaDataByLanguage('monatsuffix', language);
+    }
+
+    return label;
+}
+
+/* helper function to get right answer yes / no */
+/**
+ * 
+ * @param {bool} answer 
+ * @param {*} language 
+ */
+function getAnswer(answer, language) {
+    let formattedAnswer = answer ? 'j': 'n';
+    return getMetaDataByLanguage(formattedAnswer, language); 
 }
 
 class PDFDokument {
@@ -59,6 +142,8 @@ class PDFDokument {
         if (options.info) {
             this.document.info = options.info;
         }
+
+        this.language = options.language || 'de';
     }
 
     pipe(response) {
@@ -107,7 +192,7 @@ class PDFDokument {
         this.document.image(logo, mm(20), mm(16.2), { width: mm(9.92), height: mm(9.92)});
     }
 
-    addProject(project = {}, order) {
+    addProject(project = {}, order, options = {}) {
         const projectHeight = this.contentHeight / this.projectsPerPage;
         const projectStartX = mm(20);
         const projectStartY = this.contentStartY + order*projectHeight;
@@ -120,8 +205,11 @@ class PDFDokument {
             this.document.rect(projectStartX, projectStartY + mm(3), this.contentWidth, projectHeight - mm(6)).stroke();
         }
 
+        const projectTitle = project[`titel_${this.language}`] ||  project.titel;
+        const projectMonths = getMonthLabel(project.meta.zeitrahmen.dauer, this.language);
+
         this.document.font('public/assets/projekte/OpenSans-Bold.ttf', 16)
-        this.document.fillColor('#228461').text(`${project.titel} (${project.meta.zeitrahmen.jahr.join(' / ')}, ${project.meta.zeitrahmen.dauer} Monat${project.meta.zeitrahmen.dauer === 1 ? '' : 'e'})`, projectStartX, projectStartY + mm(5), { width: this.contentWidth});
+        this.document.fillColor('#228461').text(`${projectTitle} (${project.meta.zeitrahmen.jahr.join(' / ')}, ${project.meta.zeitrahmen.dauer} ${projectMonths})`, projectStartX, projectStartY + mm(5), { width: this.contentWidth});
         this.document.moveDown(0.5);
 
         this.document.strokeColor('#228461')
@@ -130,12 +218,15 @@ class PDFDokument {
         
         this.document.strokeColor('#228461').roundedRect(this.document.x, this.document.y, this.contentWidth, mm(15), 2).stroke();
 
+        const art = getMetaDataByLanguage(project.meta.zeitrahmen.art.toLowerCase(), this.language) || project.meta.zeitrahmen.art;
+        const team = getAnswer(project.meta.sonstiges.team, this.language);
+
         let factsY = this.document.y;
         let facts = [
-            { titel: 'Auftraggeber', value: project.meta.auftraggeber.name, width:  0.3 },
-            { titel: 'Ort', value: project.meta.auftraggeber.ort, width: 0.25 },
-            { titel: 'Agiles Team', value: project.meta.sonstiges.team ? 'Ja' : 'Nein', width: 0.25 },
-            { titel: 'Art', value: project.meta.zeitrahmen.art, width: 0.2 }
+            { titel: getMetaDataByLanguage('auftraggeber', this.language), value: project.meta.auftraggeber.name, width:  0.3 },
+            { titel: getMetaDataByLanguage('ort', this.language), value: project.meta.auftraggeber.ort, width: 0.25 },
+            { titel: getMetaDataByLanguage('team', this.language), value: team, width: 0.25 },
+            { titel: getMetaDataByLanguage('art', this.language), value: art, width: 0.2 }
         ]
 
         let factWidth = 0;
@@ -149,13 +240,17 @@ class PDFDokument {
         
         this.document.moveDown(1.5);
 
+        const projectRequirementsLabel = getMetaDataByLanguage('anforderungen', this.language);
+        const projectRequirements = project.details[`anforderungen_${this.language}`] || project.details.anforderungen;
+        const projectTasks = project.details[`aufgaben_${this.language}`] || project.details.aufgaben;
+
         // set anfordeungen
         this.document.font('public/assets/projekte/OpenSans-Bold.ttf', 11)
-        this.document.fillColor('#228461').text('Anforderungen:', projectStartX, this.document.y, { width: this.contentWidth * 2/3});
+        this.document.fillColor('#228461').text(`${projectRequirementsLabel}:`, projectStartX, this.document.y, { width: this.contentWidth * 2/3});
         this.document.moveDown(0.25);
         
         this.document.font('public/assets/projekte/OpenSans-Regular.ttf', 10).fillColor('#000');
-        project.details.anforderungen.forEach(anforderung => {
+        projectRequirements.forEach(anforderung => {
             let textYStart = this.document.y;
             let numberOfLines = (this.document.heightOfString(anforderung, { width: this.contentWidth }) / this.document.currentLineHeight()); 
             this.document.text(anforderung, projectStartX + mm(4), this.document.y, { width: this.contentWidth });
@@ -171,12 +266,14 @@ class PDFDokument {
 
         this.document.moveDown(0.5);
 
-        this.document.font('public/assets/projekte/OpenSans-Bold.ttf', 11)
-        this.document.fillColor('#228461').text('Aufgaben:', projectStartX, this.document.y, { width: this.contentWidth });
+        const projectTaskLabel = getMetaDataByLanguage('aufgaben', this.language);
+
+        this.document.font('public/assets/projekte/OpenSans-Bold.ttf', 11);
+        this.document.fillColor('#228461').text(`${projectTaskLabel}:`, projectStartX, this.document.y, { width: this.contentWidth });
         this.document.moveDown(0.25);
         // set aufgaben
         this.document.font('public/assets/projekte/OpenSans-Regular.ttf', 10).fillColor('#000');
-        project.details.aufgaben.forEach(aufgabe => {
+        projectTasks.forEach(aufgabe => {
             let textYStart = this.document.y;
             let numberOfLines = (this.document.heightOfString(aufgabe, { width: this.contentWidth }) / this.document.currentLineHeight()); 
             this.document.text(aufgabe, projectStartX + mm(4), this.document.y, { width: this.contentWidth });
@@ -218,12 +315,17 @@ class PDFDokument {
         });
     }
 
-    addPageNumbers() {
+    addPageNumbers(options) {
         const pageRange = this.document.bufferedPageRange();
+        
+        const projectLabel = getMetaDataByLanguage('meineprojekte', this.language);
+        const pageLabel = getMetaDataByLanguage('seite', this.language);
+        const ofLabel = getMetaDataByLanguage('von', this.language);
+
 
         for (let i = pageRange.start; i < pageRange.count; i++) {
             this.document.switchToPage(i);
-            this.document.fontSize(7).fillColor('#000').text(`Meine Projekte | Seite ${i+1} von ${pageRange.count}`, 0, A4.height - mm(10), { align: 'center', width: A4.width });
+            this.document.fontSize(7).fillColor('#000').text(`${projectLabel} | ${pageLabel} ${i+1} ${ofLabel} ${pageRange.count}`, 0, A4.height - mm(10), { align: 'center', width: A4.width });
         }
     }
 
