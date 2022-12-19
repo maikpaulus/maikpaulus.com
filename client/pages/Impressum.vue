@@ -8,12 +8,16 @@
                     <h3>Inhaber gemäß § 5 TMG</h3>
                     <p>
                         Maik Paulus<br>
-                        Hofmannstraße 18<br>
-                        82061 Neuried
+                        Zum Wadelborn 10<br>
+                        54429 Schillingen
                     </p>
                     <p>
                         E-Mail: <a href="mailto:work@maikpaulus.com" class="e-mail">work[at]maikpaulus.com</a><br>
-                        Telefon: <a href="tel:+491742558229">+49 174 255 82 29 </a>
+                        Telefon: <a href="tel:+491742558229">+49 174 255 82 29</a>
+                    </p>
+                    <p>
+                        Umsatzsteuer-ID:<br>
+                        DE324762547
                     </p>
             
                     <h3>Haftung für Inhalte</h3>

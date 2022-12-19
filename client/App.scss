@@ -23,3 +23,14 @@ $content-max-width: 80rem;
 
 /* Box Layout */
 $box-padding: 1em;
+
+/* ----------------------
+3. Fonts
+------------------------- */
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: norm;
+  src: url('/fonts/dejavu-bold.woff2') format('woff2'), url('/fonts/dejavu-bold.woff') format('woff');
+}

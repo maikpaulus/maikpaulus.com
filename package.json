@@ -4,8 +4,8 @@
   "description": "my personal webpage",
   "main": "app.js",
   "scripts": {
-    "start:development": "./node_modules/.bin/nodemon -L -w server -w config server/server.js",
-    "start:production": "node server/server.js",
+    "start:development": "NODE_ENV=production && ./node_modules/.bin/nodemon -L -w server -w config server/server.js",
+    "start:production": "NODE_ENV=production && node server/server.js",
     "start:deployment": "./deployment/deployment.sh",
     "start:browser-sync": "./node_modules/.bin/browser-sync start --proxy localhost:60000 --watch -f ./public/assets -f ./server --reload-delay 200",
     "start:webpack": "./node_modules/.bin/webpack -w",
@@ -42,15 +42,14 @@
     "bson-objectid": "^1.2.2",
     "css-loader": "^0.28.7",
     "file-loader": "^1.1.6",
-    "node-sass": "^4.11.0",
-    "sass-loader": "^7.1.0",
+    "node-sass": "^5.0.0",
+    "nodemon": "^1.18.3",
     "style-loader": "^0.19.1",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "url-loader": "^0.6.2",
     "vue-loader": "^15.4.2",
     "vue-template-compiler": "^2.5.11",
     "webpack": "^4.25.1",
-    "webpack-cli": "^3.1.2",
-    "nodemon": "^1.18.3"
+    "webpack-cli": "^3.1.2"
   }
 }

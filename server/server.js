@@ -210,7 +210,7 @@ app.get('*', function (req, res) {
     if (pages.indexOf(folder || req.url) === -1) {
         res.status(404);
     }
-
+    
     return res.render(catchAllFile, {
         title,
         description,

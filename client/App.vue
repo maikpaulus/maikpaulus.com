@@ -18,7 +18,7 @@
         font-family: "Open Sans";
         font-style: normal;
         font-weight: 400;
-        src: local("Open Sans"), local("OpenSans"), url("https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3aCWcynf_cDxXwCLxiixG1c.ttf") format("truetype");
+        src: local("Open Sans"), local("OpenSans") format("truetype");
     }
 
     html, .root {
